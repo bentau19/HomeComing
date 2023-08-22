@@ -1,4 +1,4 @@
-from openpyxl import load_workbook
+from openpyxl import Workbook
 import teacherClass
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill
@@ -17,9 +17,9 @@ monthDays={"ינואר": 31,
 "יולי": 31,
 "אוגוסט": 31,
 "ספטמבר": 30,
-"אוקטבור": 31,
+"אוקטובר": 31,
 "נובמבר": 30,
-"דצמבר": 31,
+"דצמבר": 31
 }
 thin_border = Border(left=Side(style='thin'),
                      right=Side(style='thin'),
@@ -30,7 +30,8 @@ if(datetime.today().year%4==0):
 
 class Sheet:
     Path = "template.xlsx"
-    sheet = load_workbook(Path)
+    sheet = Workbook()
+
     sheet_obj = sheet.active
     month = "null"
     firstFlag={"row":5,"column":1} #5,1
@@ -44,7 +45,7 @@ class Sheet:
         self.sheet_setup()
         self.sheet_design(row=self.firstFlag["row"], column=self.firstFlag["column"],title="העדרויות חודש ")
         self.sheet_design(row=self.secondFlag["row"], column=self.secondFlag["column"], title="תוספות חודש ")
-        self.sheet.save("template.xlsx")
+        self.sheet.save(str(datetime.today().year)+"-"+self.month+".xlsx")
         print("template build successfull")
     def sheet_setup(self):
         self.getData()
@@ -54,7 +55,14 @@ class Sheet:
         self.sheet_obj.cell(row = row, column = column).value=value
         self.sheet_obj.cell(row=row, column=column).fill = PatternFill(fgColor=YELLOW, fill_type = "solid")
         self.sheet_obj.cell(row=row, column=column).border = thin_border
-
+    def sumDesign(self,row,column):
+        self.sheet_obj.column_dimensions[get_column_letter(column)].width = 5
+        self.sheet_obj.cell(row=row, column=column).value="סכום"
+        self.sheet_obj.cell(row=row, column=column).fill = PatternFill(fgColor="ff99ff", fill_type="solid")
+        self.sheet_obj.cell(row=row, column=column).border = thin_border
+        for i in range(len(self.teachers)):
+            self.sheet_obj.cell(row=row+1+i, column=column).border = thin_border
+            self.sheet_obj.cell(row=row+1+i, column=column).fill = PatternFill(fgColor="ff99ff", fill_type="solid")
     def sheet_design(self,row,column,title):
         self.startDay = daysToNum[str(datetime.today().replace(day=1,month=self.monthNum()).ctime().split(" ")[0])]
         self.addHeaderCell(row=row-3,column=column,value=(title+self.month))
@@ -62,7 +70,7 @@ class Sheet:
         self.sheet_obj.column_dimensions[get_column_letter(column)].width = 20
         self.addHeaderCell(row=row - 2,column= column, value="")
         self.addHeaderCell(row=row-1,column= column,value= "מורים/תאריך")
-
+        self.sumDesign(row=row-1, column= column+1+monthDays[self.month])
         counter = self.startDay
         for i in range(monthDays[self.month]):
             self.sheet_obj.column_dimensions[get_column_letter((column+1+i))].width = 3
@@ -74,8 +82,11 @@ class Sheet:
             counter+=1
             if counter == 7:
                 counter=0
+
         for i in range(len(self.teachers)):
             self.addHeaderCell(row=row+i,column= column,value= self.teachers[i].name)
+            for j in range(monthDays[self.month]):
+                self.sheet_obj.cell(row=row+i, column=column+j+1).border = thin_border
 
 
 
