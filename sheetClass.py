@@ -7,7 +7,7 @@ from openpyxl.styles.colors import YELLOW
 from openpyxl.styles.borders import Border, Side
 from datetime import datetime
 weekDays=["א","ב","ג","ד","ה","ו","ז"]
-daysToNum ={"Sun":0,"Mon":1,"Tue":2,"Wed":3,"Thu":4,"Fri":5,"Sat":6}
+daysToNum ={"Sun": 0, "Mon": 1, "Tue": 2 ,"Wed": 3, "Thu": 4,"Fri":5,"Sat":6}
 monthDays={"ינואר": 31,
 "פבואר":28,
 "מרץ": 31,
@@ -51,26 +51,29 @@ class Sheet:
         self.getData()
         self.secondFlag["row"]= self.firstFlag["row"]+6+len(self.teachers)
 
+
+    def date_to_day(self,day):
+        sum=((int(day)+self.startDay)%7)
+        return sum
     def addHeaderCell(self,row,column,value):
         self.sheet_obj.cell(row = row, column = column).value=value
         self.sheet_obj.cell(row=row, column=column).fill = PatternFill(fgColor=YELLOW, fill_type = "solid")
         self.sheet_obj.cell(row=row, column=column).border = thin_border
     def sumDesign(self,row,column):
-        self.sheet_obj.column_dimensions[get_column_letter(column)].width = 5
         self.sheet_obj.cell(row=row, column=column).value="סכום"
         self.sheet_obj.cell(row=row, column=column).fill = PatternFill(fgColor="ff99ff", fill_type="solid")
         self.sheet_obj.cell(row=row, column=column).border = thin_border
+        for i in range(monthDays[self.month]):
+            self.sheet_obj.cell(row=row, column=column+1+i).border = thin_border
+            self.sheet_obj.cell(row=row, column=column+1+i).fill = PatternFill(fgColor="ff99ff", fill_type="solid")
+
+    def teachers_list_design(self,row,column):
         for i in range(len(self.teachers)):
-            self.sheet_obj.cell(row=row+1+i, column=column).border = thin_border
-            self.sheet_obj.cell(row=row+1+i, column=column).fill = PatternFill(fgColor="ff99ff", fill_type="solid")
-    def sheet_design(self,row,column,title):
-        self.startDay = daysToNum[str(datetime.today().replace(day=1,month=self.monthNum()).ctime().split(" ")[0])]
-        self.addHeaderCell(row=row-3,column=column,value=(title+self.month))
-        self.sheet_obj.cell(row=row-3,column=column).font=Font(bold=True)
-        self.sheet_obj.column_dimensions[get_column_letter(column)].width = 20
-        self.addHeaderCell(row=row - 2,column= column, value="")
-        self.addHeaderCell(row=row-1,column= column,value= "מורים/תאריך")
-        self.sumDesign(row=row-1, column= column+1+monthDays[self.month])
+            self.addHeaderCell(row=row+i,column= column,value= self.teachers[i].name)
+            for j in range(monthDays[self.month]):
+                self.sheet_obj.cell(row=row+i, column=column+j+1).border = thin_border
+
+    def dates_design(self,row,column):
         counter = self.startDay
         for i in range(monthDays[self.month]):
             self.sheet_obj.column_dimensions[get_column_letter((column+1+i))].width = 3
@@ -83,10 +86,28 @@ class Sheet:
             if counter == 7:
                 counter=0
 
-        for i in range(len(self.teachers)):
-            self.addHeaderCell(row=row+i,column= column,value= self.teachers[i].name)
-            for j in range(monthDays[self.month]):
-                self.sheet_obj.cell(row=row+i, column=column+j+1).border = thin_border
+    def add_num_to_place(self,teacher_location,date,num):
+        number=int(num)
+        int_date=int(date)
+        int_location=int(teacher_location)
+        self.sheet_obj.cell(row=self.firstFlag["row"]+teacher_location-1, column=self.firstFlag["column"]+int(int_date)).value = number
+        try:
+            current_sum_num = int(self.sheet_obj.cell(row=self.firstFlag["row"]+len(self.teachers), column=self.firstFlag["column"]+int_date).value)
+        except:
+            current_sum_num=0
+        self.sheet_obj.cell(row=self.firstFlag["row"] + len(self.teachers) ,column=self.firstFlag["column"] + int_date).value=int(current_sum_num)+int(number)
+        self.sheet.save(str(datetime.today().year)+"-"+self.month+".xlsx")
+    def sheet_design(self,row,column,title):
+        self.startDay = daysToNum[str(datetime.today().replace(day=1,month=self.monthNum()).ctime().split(" ")[0])]
+        self.addHeaderCell(row=row-3,column=column,value=(title+self.month))
+        self.sheet_obj.cell(row=row-3,column=column).font=Font(bold=True)
+        self.sheet_obj.column_dimensions[get_column_letter(column)].width = 20
+        self.addHeaderCell(row=row - 2,column= column, value="")
+        self.addHeaderCell(row=row-1,column= column,value= "מורים/תאריך")
+        self.sumDesign(row=row+len(self.teachers), column= column)
+        self.dates_design(row,column)
+        self.teachers_list_design(row,column)
+
 
 
 
