@@ -122,6 +122,7 @@ class Sheet:
                 data = command.split(":")
                 teacher = teacherClass.Teacher(name=data[0], days=data[1].strip().split(","))
                 self.teachers.append(teacher)
+        # self.teachers=sorted(student_objects, key=lambda student: student.age)
 
     def monthNum(self):
         return (list(monthDays).index(self.month)+1)

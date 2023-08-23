@@ -42,36 +42,41 @@ def getId(teacher_name):
     time.sleep(5)
 def getFrontalTime(day):
     return driver.find_element(By.XPATH,'//*[@id="ctl00_Main_ctl01_grdDivuachOut_ctl02_grdDivuachIn_ctl02_lblShaot'+str(day)+'"]').text
-options = optionSetter()
-LOGGER.setLevel(logging.WARNING)
-driver = webdriver.Chrome(options=options)
-action = ActionChains(driver)
-sheet = sheetClass.Sheet()
+
+def start_program():
+    action = ActionChains(driver)
+    sheet = sheetClass.Sheet()
 
 
-driver.get("https://apps.education.gov.il/mdbnet/")
-print("get into your account and than press enter:")
-input()
-driver.find_element(By.XPATH,'//*[@id="cmdLoginOfkit"]').click()
+    driver.get("https://apps.education.gov.il/mdbnet/")
+    print("get into your account and than press enter:")
+    input()
+    driver.find_element(By.XPATH,'//*[@id="cmdLoginOfkit"]').click()
 
-# try:
-ele = driver.find_element(By.XPATH,'//*[@id="menubar"]/div[2]/div/ul/li[1]')
-action.move_to_element(ele).perform()
-ele = driver.find_element(By.XPATH,'//*[@id="menubar"]/div[2]/div/ul/li[1]/ul/li[1]')
-action.move_to_element(ele).perform()
-driver.find_element(By.XPATH,'//*[@id="menubar"]/div[2]/div/ul/li[1]/ul/li[1]/ul/li[1]').click()
-counter = 1
-for teacher in sheet.teachers:
-    getId(teacher.name)
-    for day in teacher.days:
-        frontal =getFrontalTime(sheet.date_to_day(day))
-        sheet.add_num_to_place(counter, day, frontal)
-    counter+=1
-# except  Exception as e:
-#     print(e)
-input()
-print("hello")
+    # try:
+    ele = driver.find_element(By.XPATH,'//*[@id="menubar"]/div[2]/div/ul/li[1]')
+    action.move_to_element(ele).perform()
+    ele = driver.find_element(By.XPATH,'//*[@id="menubar"]/div[2]/div/ul/li[1]/ul/li[1]')
+    action.move_to_element(ele).perform()
+    driver.find_element(By.XPATH,'//*[@id="menubar"]/div[2]/div/ul/li[1]/ul/li[1]/ul/li[1]').click()
+    counter = 1
+    for teacher in sheet.teachers:
+        getId(teacher.name)
+        for day in teacher.days:
+            frontal =getFrontalTime(sheet.date_to_day(day))
+            sheet.add_num_to_place(counter, day, frontal)
+        counter+=1
+    # except  Exception as e:
+    #     print(e)
+    input()
+    print("hello")
 
-driver.quit()
+    driver.quit()
+
+if __name__=="__main__":
+    options = optionSetter()
+    LOGGER.setLevel(logging.WARNING)
+    driver = webdriver.Chrome(options=options)
+    start_program()
 
 
